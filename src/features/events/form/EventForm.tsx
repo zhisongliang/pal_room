@@ -6,10 +6,17 @@ import { createId } from "@paralleldrive/cuid2";
 type Props = {
   setFormOpen: (formOpen: boolean) => void;
   addEvent: (event: AppEvent) => void;
+  selectedEvent: AppEvent | null;
+  updateEvent: (event: AppEvent) => void;
 };
 
-export default function EventForm({ setFormOpen, addEvent }: Props) {
-  const initalValues = {
+export default function EventForm({
+  setFormOpen,
+  addEvent,
+  selectedEvent,
+  updateEvent,
+}: Props) {
+  const initalValues = selectedEvent ?? {
     title: "",
     category: "",
     description: "",
@@ -21,13 +28,15 @@ export default function EventForm({ setFormOpen, addEvent }: Props) {
   const [values, setValues] = useState(initalValues);
 
   function onSubmit() {
-    addEvent({
-      ...values,
-      id: createId(),
-      hostedBy: "bob",
-      attendees: [],
-      hostPhotoURL: "",
-    });
+    selectedEvent
+      ? updateEvent({ ...selectedEvent, ...values })
+      : addEvent({
+          ...values,
+          id: createId(),
+          hostedBy: "bob",
+          attendees: [],
+          hostPhotoURL: "",
+        });
     setFormOpen(false);
   }
 
@@ -38,7 +47,7 @@ export default function EventForm({ setFormOpen, addEvent }: Props) {
 
   return (
     <Segment clearing>
-      <Header content="Create Event" />
+      <Header content={selectedEvent ? "Update event" : "Create new event"} />
       <Form onSubmit={onSubmit}>
         <Form.Field>
           <input

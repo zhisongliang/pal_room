@@ -8,9 +8,16 @@ import { useEffect, useState } from "react";
 type Props = {
   formOpen: boolean;
   setFormOpen: (formOpen: boolean) => void;
+  selectEvent: (event: AppEvent | null) => void;
+  selectedEvent: AppEvent | null;
 };
 
-export default function EventDashboard({ formOpen, setFormOpen }: Props) {
+export default function EventDashboard({
+  formOpen,
+  setFormOpen,
+  selectEvent,
+  selectedEvent,
+}: Props) {
   const [events, setEvents] = useState<AppEvent[]>([]);
 
   useEffect(() => {
@@ -23,14 +30,36 @@ export default function EventDashboard({ formOpen, setFormOpen }: Props) {
     });
   }
 
+  function updateEvent(updatedEvent: AppEvent) {
+    setEvents(
+      events.map((evt) => (evt.id === updatedEvent.id ? updatedEvent : evt))
+    );
+    selectEvent(null);
+    setFormOpen(false);
+  }
+
+  function deleteEvent(eventId: string) {
+    setEvents(events.filter((evt) => evt.id !== eventId));
+  }
+
   return (
     <Grid>
       <Grid.Column width={10}>
-        <EventList events={events} />
+        <EventList
+          events={events}
+          selectEvent={selectEvent}
+          deleteEvent={deleteEvent}
+        />
       </Grid.Column>
       <Grid.Column width={6}>
         {formOpen && (
-          <EventForm setFormOpen={setFormOpen} addEvent={addEvent} />
+          <EventForm
+            setFormOpen={setFormOpen}
+            updateEvent={updateEvent}
+            addEvent={addEvent}
+            selectedEvent={selectedEvent}
+            key={selectedEvent ? selectedEvent.id : "create"}
+          />
         )}
       </Grid.Column>
     </Grid>
